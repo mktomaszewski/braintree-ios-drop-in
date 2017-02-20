@@ -44,6 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// Defaults to false.
 @property (nonatomic, assign) BOOL threeDSecureVerification;
 
+@property (nonatomic, assign) BOOL shouldTokenize;
+
 @end
 
 NS_ASSUME_NONNULL_END

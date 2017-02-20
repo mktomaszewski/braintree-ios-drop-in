@@ -399,6 +399,14 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     BTDropInPaymentSeletionCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    
+    if (!self.dropInRequest.shouldTokenize) {
+        if (self.delegate ) {
+            [self.delegate selectionCompletedWithPaymentMethodType:cell.type  nonce:nil error:nil];
+        }
+        return;
+    }
+    
     if (cell.type == BTUIKPaymentOptionTypeUnknown) {
         if ([self.delegate respondsToSelector:@selector(showCardForm:)]){
             [self.delegate performSelector:@selector(showCardForm:) withObject:self];

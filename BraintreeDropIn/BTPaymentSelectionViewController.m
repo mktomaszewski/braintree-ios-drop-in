@@ -136,6 +136,7 @@
     heightConstraint.active = YES;
     [self.stackView addArrangedSubview:self.savedPaymentMethodsCollectionView];
 
+
     self.paymentOptionsHeader = [self sectionHeaderLabelWithString:BTUIKLocalizedString(OTHER_LABEL)];
     self.paymentOptionsHeader.translatesAutoresizingMaskIntoConstraints = NO;
 
@@ -226,7 +227,7 @@
             self.paymentOptionsData = [activePaymentOptions copy];
             [self.savedPaymentMethodsCollectionView reloadData];
             [self.paymentOptionsTableView reloadData];
-            if (self.paymentMethodNonces.count == 0) {
+            if (self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize) {
                 self.savedPaymentMethodsCollectionView.hidden = YES;
                 self.vaultedPaymentsHeader.hidden = YES;
                 self.paymentOptionsLabelContainerStackView.hidden = YES;
@@ -316,7 +317,8 @@
 }
 
 - (float) sheetHeight {
-    return self.paymentMethodNonces.count == 0 ? 280 : 470;
+    CGFloat height = self.paymentOptionsTableView.frame.size.height;
+    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ? height + 150 : 470;
 }
 
 #pragma mark - Protocol conformance

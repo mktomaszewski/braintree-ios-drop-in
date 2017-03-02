@@ -317,8 +317,7 @@
 }
 
 - (float) sheetHeight {
-    CGFloat height = self.paymentOptionsTableView.frame.size.height;
-    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ? height + 150 : 470;
+    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ? 280 : 470;
 }
 
 #pragma mark - Protocol conformance

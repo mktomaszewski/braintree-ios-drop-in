@@ -317,7 +317,7 @@
 }
 
 - (float) sheetHeight {
-    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ? 280 : 470;
+    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ? 280: 470 + 50;
 }
 
 #pragma mark - Protocol conformance

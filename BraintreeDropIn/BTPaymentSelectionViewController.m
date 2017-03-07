@@ -317,7 +317,9 @@
 }
 
 - (float) sheetHeight {
-    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ? 280: 470 + 50;
+    return self.paymentMethodNonces.count == 0 || !self.dropInRequest.shouldTokenize ?
+    148 + 44* self.paymentOptionsData.count :
+    382 + 44* self.paymentOptionsData.count;
 }
 
 #pragma mark - Protocol conformance
@@ -388,10 +390,11 @@
     cell.selectionStyle = UITableViewCellSelectionStyleDefault;
     BTUIKPaymentOptionType option = ((NSNumber*)self.paymentOptionsData[indexPath.row]).intValue;
 
-    cell.label.text = [BTUIKViewUtil nameForPaymentMethodType:option];
-    if (option == BTUIKPaymentOptionTypeUnknown) {
-        cell.label.text = BTUIKLocalizedString(CREDIT_OR_DEBIT_CARD_LABEL);
-    }
+    
+    NSString *paymentName = option == BTUIKPaymentOptionTypeUnknown ? BTUIKLocalizedString(CREDIT_OR_DEBIT_CARD_LABEL) : [BTUIKViewUtil nameForPaymentMethodType:option];
+    
+    cell.label.text = self.dropInRequest.shouldTokenize || option == BTUIKPaymentOptionTypeApplePay ? paymentName :
+                                            [NSString stringWithFormat:@"%@ (Safari)",paymentName];
     cell.iconView.paymentOptionType = option;
     cell.type = option;
 

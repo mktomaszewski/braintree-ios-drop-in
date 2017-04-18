@@ -269,11 +269,16 @@
             // no action
         } else {
 			
-			NSPredicate *predicate = [NSPredicate predicateWithFormat:@"NOT (self isKindOfClass:%@)",[BTApplePayCardNonce class]];
+#ifdef __BT_APPLE_PAY
+			NSPredicate *predicate = [NSPredicate predicateWithFormat:@"NOT (self isKindOfClass:%@)", [BTApplePayCardNonce class]];
 			NSArray *filteredArray = [[paymentMethodNonces filteredArrayUsingPredicate:predicate] copy];
-			
 			self.paymentMethodNonces = filteredArray;
-            if (completionBlock) {
+#else
+			self.paymentMethodNonces = [paymentMethodNonces copy];
+			
+#endif
+			
+			if (completionBlock) {
                 completionBlock();
             }
         }

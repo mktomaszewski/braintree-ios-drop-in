@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "BraintreeDropIn"
-  s.version          = "5.1.1"
+  s.version          = "5.1.2"
   s.summary          = "Braintree v.zero: A modern foundation for accepting payments"
   s.description      = <<-DESC
                        Braintree is a full-stack payments platform for developers
@@ -41,4 +41,3 @@ Pod::Spec.new do |s|
       "Braintree-UIKit-Localization" => ["BraintreeUIKit/Localization/*.lproj"] }
   end
 end
-

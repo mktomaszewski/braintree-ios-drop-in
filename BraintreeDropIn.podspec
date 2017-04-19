@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name             = "BraintreeDropIn"
+  s.name             = "STMBraintreeDropIn"
   s.version          = "5.1.2"
   s.summary          = "Braintree v.zero: A modern foundation for accepting payments"
   s.description      = <<-DESC

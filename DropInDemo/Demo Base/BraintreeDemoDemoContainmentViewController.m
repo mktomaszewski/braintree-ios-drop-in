@@ -21,6 +21,11 @@
 @implementation BraintreeDemoDemoContainmentViewController
 
 - (void)viewDidLoad {
+    self.title = @"Braintree";
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action: @selector(tappedRefresh)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStylePlain target:self action: @selector(tappedSettings)];
+    self.view.backgroundColor = [UIColor whiteColor];
+    [self.navigationController setToolbarHidden:NO];
     [super viewDidLoad];
     [self setupToolbar];
     [self reloadIntegration];
@@ -252,7 +257,7 @@
     return block;
 }
 
-- (void (^)())transactionBlock {
+- (void (^)(void))transactionBlock {
     // This class is responsible for retaining the completion block
     static id block;
     static dispatch_once_t onceToken;

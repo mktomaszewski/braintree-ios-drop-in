@@ -21,7 +21,7 @@
 #define BT_HALF_SHEET_MARGIN 5
 #define BT_HALF_SHEET_CORNER_RADIUS 12
 
-@interface BTDropInController () <BTAppSwitchDelegate, BTViewControllerPresentingDelegate, BTPaymentSelectionViewControllerDelegate, BTCardFormViewControllerDelegate>
+@interface BTDropInController () <BTAppSwitchDelegate, BTDropInControllerDelegate, BTViewControllerPresentingDelegate, BTPaymentSelectionViewControllerDelegate, BTCardFormViewControllerDelegate>
 
 @property (nonatomic, strong) BTConfiguration *configuration;
 @property (nonatomic, strong, readwrite) BTAPIClient *apiClient;
@@ -272,6 +272,8 @@
             if (tokenizedCard != nil) {
                 result.paymentOptionType = [BTUIKViewUtil paymentOptionTypeForPaymentInfoType:tokenizedCard.type];
                 result.paymentMethod = tokenizedCard;
+            } else if (error == nil) {
+                result.cancelled = YES;
             }
             [sender dismissViewControllerAnimated:YES completion:^{
                 self.handler(self, result, error);
@@ -281,14 +283,15 @@
 }
 
 - (void)updateToolbarForViewController:(UIViewController*)viewController {
-    UILabel *titleLabel = [[UILabel alloc] init];
-    [BTUIKAppearance styleLabelBoldPrimary:titleLabel];
+    UILabel *titleLabel = [BTUIKAppearance styledNavigationTitleLabel];
     titleLabel.text = viewController.title ? viewController.title : @"";
     titleLabel.textAlignment = NSTextAlignmentCenter;
+    [titleLabel setContentCompressionResistancePriority:UILayoutPriorityFittingSizeLevel forAxis:UILayoutConstraintAxisHorizontal];
     [titleLabel sizeToFit];
     UIBarButtonItem *barTitle = [[UIBarButtonItem alloc] initWithCustomView:titleLabel];
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     UIBarButtonItem *fixed = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    fixed.width = 1.0;
     UIBarButtonItem *leftItem = viewController.navigationItem.leftBarButtonItem ? viewController.navigationItem.leftBarButtonItem : fixed;
     UIBarButtonItem *rightItem = viewController.navigationItem.rightBarButtonItem ? viewController.navigationItem.rightBarButtonItem : fixed;
     [self.btToolbar setItems:@[leftItem, flex, barTitle, flex, rightItem] animated:YES];
@@ -298,9 +301,11 @@
     BTCardFormViewController* vd = [[BTCardFormViewController alloc] initWithAPIClient:self.apiClient request:self.dropInRequest];
     vd.supportedCardTypes = self.displayCardTypes;
     vd.delegate = self;
-      UINavigationController* navController = [[UINavigationController alloc] initWithRootViewController:vd];
+    UINavigationController* navController = [[UINavigationController alloc] initWithRootViewController:vd];
     if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         navController.modalPresentationStyle = UIModalPresentationPageSheet;
+    } else {
+        navController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     }
     [self presentViewController:navController animated:YES completion:nil];
 }
@@ -480,6 +485,14 @@
     [UIView animateWithDuration:BT_ANIMATION_TRANSITION_SPEED delay:0.0 usingSpringWithDamping:0.8 initialSpringVelocity:4 options:0 animations:^{
         [self.view layoutIfNeeded];
     } completion:nil];
+}
+
+#pragma mark BTDropInControllerDelegate
+
+- (void)reloadDropInData {
+    [self.paymentSelectionViewController loadConfiguration];
+    [self flexViewAnimated:NO];
+    [self.view setNeedsDisplay];
 }
 
 @end

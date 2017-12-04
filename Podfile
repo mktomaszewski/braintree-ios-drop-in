@@ -5,7 +5,6 @@ platform :ios, '9.0'
 workspace 'BraintreeDropIn.xcworkspace'
 
 target 'DropInDemo' do
-  pod 'HockeySDK'
   pod 'AFNetworking', '~> 2.6.0'
   pod 'CardIO'
   pod 'NSURL+QueryDictionary', '~> 1.0'
@@ -18,6 +17,7 @@ target 'DropInDemo' do
 
   pod 'Braintree/Apple-Pay'
   pod 'Braintree/PayPal'
+  pod 'Braintree/3D-Secure'
 end
 
 abstract_target 'Tests' do

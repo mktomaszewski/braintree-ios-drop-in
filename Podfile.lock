@@ -20,68 +20,68 @@ PODS:
   - AFNetworking/UIKit (2.6.3):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
-  - Braintree/Apple-Pay (4.7.1):
+  - Braintree/3D-Secure (4.9.3):
+    - Braintree/Card
     - Braintree/Core
-  - Braintree/Card (4.7.1):
+  - Braintree/Apple-Pay (4.9.3):
     - Braintree/Core
-  - Braintree/Core (4.7.1)
-  - Braintree/PayPal (4.7.1):
+  - Braintree/Card (4.9.3):
+    - Braintree/Core
+  - Braintree/Core (4.9.3)
+  - Braintree/PayPal (4.9.3):
     - Braintree/Core
     - Braintree/PayPalOneTouch
-  - Braintree/PayPalDataCollector (4.7.1):
+  - Braintree/PayPalDataCollector (4.9.3):
     - Braintree/Core
     - Braintree/PayPalUtils
-  - Braintree/PayPalOneTouch (4.7.1):
+  - Braintree/PayPalOneTouch (4.9.3):
     - Braintree/Core
     - Braintree/PayPalDataCollector
     - Braintree/PayPalUtils
-  - Braintree/PayPalUtils (4.7.1)
-  - Braintree/UnionPay (4.7.1):
+  - Braintree/PayPalUtils (4.9.3)
+  - Braintree/UnionPay (4.9.3):
     - Braintree/Card
     - Braintree/Core
-  - BraintreeDropIn (5.0.0):
-    - BraintreeDropIn/DropIn (= 5.0.0)
-  - BraintreeDropIn/DropIn (5.0.0):
+  - BraintreeDropIn (5.2.2):
+    - BraintreeDropIn/DropIn (= 5.2.2)
+  - BraintreeDropIn/DropIn (5.2.2):
     - Braintree/Card (~> 4.0)
     - Braintree/Core (~> 4.0)
     - Braintree/UnionPay (~> 4.0)
     - BraintreeDropIn/UIKit
-  - BraintreeDropIn/UIKit (5.0.0)
+  - BraintreeDropIn/UIKit (5.2.2)
   - CardIO (5.4.1)
-  - Expecta (1.0.5)
+  - Expecta (1.0.6)
   - FLEX (2.4.0)
-  - HockeySDK (4.1.2):
-    - HockeySDK/DefaultLib (= 4.1.2)
-  - HockeySDK/DefaultLib (4.1.2)
-  - InAppSettingsKit (2.8)
+  - InAppSettingsKit (2.8.1)
   - iOS-Slide-Menu (1.5)
   - NSURL+QueryDictionary (1.2.0)
-  - OCMock (3.3.1)
-  - OHHTTPStubs (5.2.2):
-    - OHHTTPStubs/Default (= 5.2.2)
-  - OHHTTPStubs/Core (5.2.2)
-  - OHHTTPStubs/Default (5.2.2):
+  - OCMock (3.4)
+  - OHHTTPStubs (6.0.0):
+    - OHHTTPStubs/Default (= 6.0.0)
+  - OHHTTPStubs/Core (6.0.0)
+  - OHHTTPStubs/Default (6.0.0):
     - OHHTTPStubs/Core
     - OHHTTPStubs/JSON
     - OHHTTPStubs/NSURLSession
     - OHHTTPStubs/OHPathHelpers
-  - OHHTTPStubs/JSON (5.2.2):
+  - OHHTTPStubs/JSON (6.0.0):
     - OHHTTPStubs/Core
-  - OHHTTPStubs/NSURLSession (5.2.2):
+  - OHHTTPStubs/NSURLSession (6.0.0):
     - OHHTTPStubs/Core
-  - OHHTTPStubs/OHPathHelpers (5.2.2)
+  - OHHTTPStubs/OHPathHelpers (6.0.0)
   - PureLayout (3.0.2)
-  - Specta (1.0.5)
+  - Specta (1.0.6)
 
 DEPENDENCIES:
   - AFNetworking (~> 2.6.0)
+  - Braintree/3D-Secure
   - Braintree/Apple-Pay
   - Braintree/PayPal
   - BraintreeDropIn (from `./`)
   - CardIO
   - Expecta
   - FLEX
-  - HockeySDK
   - InAppSettingsKit
   - iOS-Slide-Menu
   - NSURL+QueryDictionary (~> 1.0)
@@ -92,24 +92,23 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   BraintreeDropIn:
-    :path: "./"
+    :path: ./
 
 SPEC CHECKSUMS:
   AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
-  Braintree: c57bcb7983412530ea6d71cee4b99a4ba316c4ef
-  BraintreeDropIn: 265ea99e6f40cd51c23840fdb32fc88148b641da
+  Braintree: 3f35df3f1e0ecfc942e067aaf40f17994924a46a
+  BraintreeDropIn: 0ff4879547af66dae814911992e01324975d556d
   CardIO: 56983b39b62f495fc6dae9ad7cf875143df06443
-  Expecta: e1c022fcd33910b6be89c291d2775b3fe27a89fe
+  Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   FLEX: bd1a39e55b56bb413b6f1b34b3c10a0dc44ef079
-  HockeySDK: c7523379550a4305cefc1cdfa7b5f9a5a3538180
-  InAppSettingsKit: fe3e73f8f9530cdd6270065cd7df7b3773f557e6
+  InAppSettingsKit: 94d2fba3ccd700fc4e32c6d09fabcc0af2426744
   iOS-Slide-Menu: 40b0cbd8916c42afc755f0869793cd09e7a32102
   NSURL+QueryDictionary: bae616404e2adf6409d3d5c02a093cbf44c8a236
-  OCMock: f3f61e6eaa16038c30caa5798c5e49d3307b6f22
-  OHHTTPStubs: 34d9d0994e64fcf8552dbfade5ce82ada913ee31
+  OCMock: 35ae71d6a8fcc1b59434d561d1520b9dd4f15765
+  OHHTTPStubs: 752f9b11fd810a15162d50f11c06ff94f8e012eb
   PureLayout: 4d550abe49a94f24c2808b9b95db9131685fe4cd
-  Specta: ac94d110b865115fe60ff2c6d7281053c6f8e8a2
+  Specta: f506f3a8361de16bc0dcf3b17b75e269072ba465
 
-PODFILE CHECKSUM: 1cba8d46d9f62f04c78b5a5504db6cac3991cdd7
+PODFILE CHECKSUM: e81f98d99201c92080d1ab0f5625cd6da3b954dc
 
-COCOAPODS: 1.1.1
+COCOAPODS: 1.3.1

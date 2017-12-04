@@ -7,8 +7,9 @@
 #import "BraintreeDemoSettings.h"
 #import "BTPaymentSelectionViewController.h"
 #import "BraintreeApplePay.h"
+#import "Braintree3DSecure.h"
 
-@interface BraintreeDemoDropInViewController () <PKPaymentAuthorizationViewControllerDelegate>
+@interface BraintreeDemoDropInViewController () <PKPaymentAuthorizationViewControllerDelegate, BTViewControllerPresentingDelegate>
 
 @property (nonatomic, strong) BTUIKPaymentOptionCardView *paymentMethodTypeIcon;
 @property (nonatomic, strong) UILabel *paymentMethodTypeLabel;
@@ -22,6 +23,7 @@
 @property (nonatomic, strong) NSString *authorizationString;
 @property (nonatomic) BOOL useApplePay;
 @property (nonatomic, strong) BTPaymentMethodNonce *selectedNonce;
+@property (nonatomic, strong) NSArray *checkoutConstraints;
 @end
 
 @implementation BraintreeDemoDropInViewController
@@ -61,7 +63,7 @@
     [self.view addSubview:self.itemLabel];
 
     self.priceLabel = [[UILabel alloc] init];
-    [self.priceLabel setText:@"$100"];
+    [self.priceLabel setText:@"$10"];
     self.priceLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:self.priceLabel];
 
@@ -106,10 +108,13 @@
     [self.view addSubview:self.dropinThemeSwitch];
     
     [self updatePaymentMethodConstraints];
+    [self fetchPaymentMethods];
+}
 
+- (void)fetchPaymentMethods {
     self.progressBlock(@"Fetching customer's payment methods...");
     self.useApplePay = NO;
-    
+
     [BTDropInResult fetchDropInResultForAuthorization:self.authorizationString handler:^(BTDropInResult * _Nullable result, NSError * _Nullable error) {
         if (error) {
             self.progressBlock([NSString stringWithFormat:@"Error: %@", error.localizedDescription]);
@@ -128,7 +133,7 @@
     }];
 }
 
-- (void) setupApplePay {
+- (void)setupApplePay {
     self.paymentMethodTypeLabel.hidden = NO;
     self.paymentMethodTypeIcon.hidden = NO;
     self.paymentMethodTypeIcon.paymentOptionType = BTUIKPaymentOptionTypeApplePay;
@@ -140,7 +145,9 @@
 #pragma mark Constraints
 
 - (void)updatePaymentMethodConstraints {
-    [self.view removeConstraints:self.view.constraints];
+    if (self.checkoutConstraints) {
+        [NSLayoutConstraint deactivateConstraints:self.checkoutConstraints];
+    }
 
     NSDictionary *viewBindings = @{
                                    @"view": self,
@@ -154,35 +161,33 @@
                                    @"purchaseButton":self.purchaseButton,
                                    @"dropinThemeSwitch":self.dropinThemeSwitch
                                    };
-
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[cartLabel]-|" options:0 metrics:nil views:viewBindings]];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[purchaseButton]-|" options:0 metrics:nil views:viewBindings]];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(20)-[cartLabel]-[itemLabel]-[paymentMethodHeaderLabel]" options:0 metrics:nil views:viewBindings]];
-
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[itemLabel]-[priceLabel]-|" options:NSLayoutFormatAlignAllTop metrics:nil views:viewBindings]];
-
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[paymentMethodHeaderLabel]-|" options:0 metrics:nil views:viewBindings]];
+    
+    NSMutableArray *newConstraints = [NSMutableArray new];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[cartLabel]-|" options:0 metrics:nil views:viewBindings]];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[purchaseButton]-|" options:0 metrics:nil views:viewBindings]];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(20)-[cartLabel]-[itemLabel]-[paymentMethodHeaderLabel]" options:0 metrics:nil views:viewBindings]];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[itemLabel]-[priceLabel]-|" options:NSLayoutFormatAlignAllTop metrics:nil views:viewBindings]];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[paymentMethodHeaderLabel]-|" options:0 metrics:nil views:viewBindings]];
 
     if (!self.paymentMethodTypeIcon.hidden && !self.paymentMethodTypeLabel.hidden) {
-        [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[paymentMethodHeaderLabel]-[paymentMethodTypeIcon(29)]-[dropInButton]" options:0 metrics:nil views:viewBindings]];
-
-        [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[paymentMethodTypeIcon(45)]-[paymentMethodTypeLabel]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:viewBindings]];
-        [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[dropInButton]-|" options:0 metrics:nil views:viewBindings]];
+        [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[paymentMethodHeaderLabel]-[paymentMethodTypeIcon(29)]-[dropInButton]" options:0 metrics:nil views:viewBindings]];
+        [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[paymentMethodTypeIcon(45)]-[paymentMethodTypeLabel]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:viewBindings]];
+        [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[dropInButton]-|" options:0 metrics:nil views:viewBindings]];
         [self.dropInButton setTitle:@"Change Payment Method" forState:UIControlStateNormal];
         self.purchaseButton.backgroundColor = self.view.tintColor;
         self.purchaseButton.enabled = YES;
     } else {
-        [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[paymentMethodHeaderLabel]-[dropInButton]" options:0 metrics:nil views:viewBindings]];
-
-        [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[dropInButton]-|" options:0 metrics:nil views:viewBindings]];
+        [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[paymentMethodHeaderLabel]-[dropInButton]" options:0 metrics:nil views:viewBindings]];
+        [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[dropInButton]-|" options:0 metrics:nil views:viewBindings]];
         [self.dropInButton setTitle:@"Add Payment Method" forState:UIControlStateNormal];
         self.purchaseButton.backgroundColor = [UIColor lightGrayColor];
         self.purchaseButton.enabled = NO;
     }
-
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[dropInButton]-(20)-[purchaseButton]-(20)-[dropinThemeSwitch]" options:0 metrics:nil views:viewBindings]];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[dropInButton]-(20)-[purchaseButton]-(20)-[dropinThemeSwitch]" options:0 metrics:nil views:viewBindings]];
+    [newConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[dropinThemeSwitch]-|" options:0 metrics:nil views:viewBindings]];
     
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[dropinThemeSwitch]-|" options:0 metrics:nil views:viewBindings]];
+    self.checkoutConstraints = newConstraints;
+    [self.view addConstraints:self.checkoutConstraints];
 }
 
 #pragma mark Button Handlers
@@ -192,7 +197,7 @@
 
         PKPaymentRequest *paymentRequest = [[PKPaymentRequest alloc] init];
         paymentRequest.paymentSummaryItems = @[
-                                               [PKPaymentSummaryItem summaryItemWithLabel:@"Socks" amount:[NSDecimalNumber decimalNumberWithString:@"100"]]
+                                               [PKPaymentSummaryItem summaryItemWithLabel:@"Socks" amount:[NSDecimalNumber decimalNumberWithString:@"10"]]
                                                ];
         paymentRequest.supportedNetworks = @[PKPaymentNetworkVisa, PKPaymentNetworkMasterCard, PKPaymentNetworkAmex, PKPaymentNetworkDiscover];
         paymentRequest.merchantCapabilities = PKMerchantCapability3DS;
@@ -216,7 +221,10 @@
         
         self.progressBlock(@"Presenting Apple Pay Sheet");
         [self presentViewController:viewController animated:YES completion:nil];
-    } else {
+    } else if ([BraintreeDemoSettings threeDSecureRequiredStatus] == BraintreeDemoTransactionServiceThreeDSecureRequiredStatusRequired && ![self.selectedNonce isKindOfClass:[BTThreeDSecureCardNonce class]]) {
+        [self performThreeDSecureVerification];
+    }
+    else {
         self.completionBlock(self.selectedNonce);
         self.transactionBlock();
     }
@@ -225,8 +233,10 @@
 - (void)tappedToShowDropIn {
     BTDropInRequest *dropInRequest = [[BTDropInRequest alloc] init];
     // To test 3DS
-    //dropInRequest.amount = @"10.00";
-    //dropInRequest.threeDSecureVerification = YES;
+    if ([BraintreeDemoSettings threeDSecureRequiredStatus] == BraintreeDemoTransactionServiceThreeDSecureRequiredStatusRequired) {
+        dropInRequest.amount = @"10.00";
+        dropInRequest.threeDSecureVerification = YES;
+    }
     if (self.dropinThemeSwitch.selectedSegmentIndex == 0) {
         [BTUIKAppearance lightTheme];
     } else {
@@ -276,6 +286,23 @@
     }
 }
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
+- (void)paymentAuthorizationViewController:(__unused PKPaymentAuthorizationViewController *)controller didAuthorizePayment:(PKPayment *)payment handler:(void (^)(PKPaymentAuthorizationResult * _Nonnull))completion API_AVAILABLE(ios(11.0), watchos(4.0)) {
+    self.progressBlock(@"Apple Pay Did Authorize Payment");
+    BTAPIClient *client = [[BTAPIClient alloc] initWithAuthorization:self.authorizationString];
+    BTApplePayClient *applePayClient = [[BTApplePayClient alloc] initWithAPIClient:client];
+    [applePayClient tokenizeApplePayPayment:payment completion:^(BTApplePayCardNonce * _Nullable tokenizedApplePayPayment, NSError * _Nullable error) {
+        if (error) {
+            self.progressBlock(error.localizedDescription);
+            completion([[PKPaymentAuthorizationResult alloc] initWithStatus:PKPaymentAuthorizationStatusFailure errors:nil]);
+        } else {
+            self.completionBlock(tokenizedApplePayPayment);
+            completion([[PKPaymentAuthorizationResult alloc] initWithStatus:PKPaymentAuthorizationStatusSuccess errors:nil]);
+        }
+    }];
+}
+#endif
+
 - (void)paymentAuthorizationViewController:(__unused PKPaymentAuthorizationViewController *)controller
                        didAuthorizePayment:(PKPayment *)payment
                                 completion:(void (^)(PKPaymentAuthorizationStatus status))completion {
@@ -299,6 +326,43 @@
 
 - (void)paymentAuthorizationViewControllerWillAuthorizePayment:(__unused PKPaymentAuthorizationViewController *)controller {
     self.progressBlock(@"Apple Pay will Authorize Payment");
+}
+
+#pragma mark ThreeDSecure Verification
+
+- (void)performThreeDSecureVerification {
+    BTAPIClient* apiClient = [[BTAPIClient alloc] initWithAuthorization:self.authorizationString];
+    BTThreeDSecureDriver *threeDSecure = [[BTThreeDSecureDriver alloc] initWithAPIClient:apiClient delegate:self];
+    [threeDSecure verifyCardWithNonce:self.selectedNonce.nonce
+                               amount:[NSDecimalNumber decimalNumberWithString:@"10"]
+                           completion:^(BTThreeDSecureCardNonce * _Nullable threeDSecureCard, NSError * _Nullable error)
+     {
+         self.selectedNonce = nil;
+         if (error) {
+             // Error and nonce was consumed
+             [self updatePaymentMethod:self.selectedNonce];
+             [self fetchPaymentMethods];
+             self.progressBlock(error.localizedDescription);
+             return;
+         } else if (threeDSecureCard == nil) {
+             // User cancelled and nonce was consumed
+             [self updatePaymentMethod:self.selectedNonce];
+             [self fetchPaymentMethods];
+             return;
+         }
+         self.selectedNonce = threeDSecureCard;
+         [self updatePaymentMethod:self.selectedNonce];
+         self.completionBlock(self.selectedNonce);
+         self.transactionBlock();
+     }];
+}
+
+- (void)paymentDriver:(__unused id)driver requestsPresentationOfViewController:(UIViewController *)viewController {
+    [self presentViewController:viewController animated:YES completion:nil];
+}
+
+- (void)paymentDriver:(__unused id)driver requestsDismissalOfViewController:(__unused UIViewController *)viewController {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
